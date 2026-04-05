@@ -1,0 +1,18 @@
+# 1. Security (NEVER UPLOAD THIS)
+.env
+.env.local
+
+# 2. Dependencies (Too big to upload)
+node_modules/
+
+# 3. Build Files
+dist/
+build/
+
+# 4. Logs and Cache
+npm-debug.log*
+.eslintcache
+.DS_Store
+
+# 5. Drizzle Config Cache
+.drizzle/

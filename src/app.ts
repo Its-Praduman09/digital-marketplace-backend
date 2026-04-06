@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { testDbConnection } from './config/db.js';
+import { authRoutes } from './routes/auth.routes.js';
 
 const app = Fastify({
   logger: { 
@@ -12,7 +13,7 @@ const app = Fastify({
     } 
   },
 });
-
+app.register(authRoutes,{prefix:"/api/auth"})
 const start = async () => {
   try {
     // 1. Connect to PostgreSQL first (Fail fast if DB is down)

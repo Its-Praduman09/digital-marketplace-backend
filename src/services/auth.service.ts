@@ -26,7 +26,8 @@ export const registerUserService = async (userData: RegisterInput) => {
   }).returning({
     id: users.id,
     name: users.name,
-    email: users.email
+    email: users.email,
+    createdAt:users.createdAt
   });
 
   return newUser;

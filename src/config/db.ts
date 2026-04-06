@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
-import * as schema from '../schema/index';
+import * as schema from '../schema/index.js';
 
-// 1. Create a connection pool (Professional Singleton)
+// 1. Create a connection pool 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20, // Recommended for a marketplace to handle multiple users

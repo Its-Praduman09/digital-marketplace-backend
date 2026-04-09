@@ -1,15 +1,16 @@
 import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 import { db } from '../config/db.js';
-import { users } from '../schema/users.js';
-import { LoginInput, RegisterInput } from '../validation/auth.schema.js';
+import { users } from '../schema/index.js';
 
-export const registerUserService = async (userData: RegisterInput) => {
+export const registerUserService = async (userData: any) => {
+  const email = userData.email.toLowerCase().trim();
+
   // 1. Check if user already exists
   const [existingUser] = await db
-    .select()
+    .select({ id: users.id })
     .from(users)
-    .where(eq(users.email, userData.email));
+    .where(eq(users.email, email));
 
   if (existingUser) {
     throw new Error("User with this email already exists");
@@ -18,42 +19,42 @@ export const registerUserService = async (userData: RegisterInput) => {
   // 2. Hash the password
   const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-  // 3. Insert into PostgreSQL
+  // 3. Insert into PostgreSQL (Using your lean schema columns)
   const [newUser] = await db.insert(users).values({
-    name: userData.name,
-    email: userData.email,
+    name: userData.name, // Matches your schema 'name'
+    email,
     password: hashedPassword,
   }).returning({
     id: users.id,
     name: users.name,
     email: users.email,
-    createdAt: users.createdAt
+    createdAt: users.createdAt // Matches your schema 'createdAt'
   });
 
   return newUser;
 };
 
-// --- Login Service (ADD THIS) ---
-export const loginUserService = async (loginData: LoginInput) => {
+export const loginUserService = async (loginData: any) => {
+  const email = loginData.email.toLowerCase().trim();
+
   // 1. Find user by email
   const [user] = await db
     .select()
     .from(users)
-    .where(eq(users.email, loginData.email));
+    .where(eq(users.email, email));
 
-  // 2. If user doesn't exist, throw error
   if (!user) {
     throw new Error("Invalid email or password");
   }
 
-  // 3. Compare the provided password with the hashed password in DB
+  // 2. Compare passwords
   const isPasswordValid = await bcrypt.compare(loginData.password, user.password);
 
   if (!isPasswordValid) {
     throw new Error("Invalid email or password");
   }
 
-  // 4. Return user data (Everything except the password!)
+  // 3. Return safe user data (Strictly no password)
   return {
     id: user.id,
     name: user.name,

@@ -1,35 +1,41 @@
-import fastifyJwt from '@fastify/jwt';
+import multipart from '@fastify/multipart';
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { testDbConnection } from './config/db.js';
 import { authRoutes } from './routes/auth.routes.js';
+import { productRoutes } from './routes/product.routes.js';
+import { uploadRoutes } from './routes/upload.routes.js';
 
 const app = Fastify({
   logger: {
     transport: {
       target: 'pino-pretty',
-      options: {
-        colorize: true,
-      }
+      options: { colorize: true }
     }
   },
 });
-app.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET || 'supersecretkey-surat-2026'
+// 1. Register Plugins
+// This MUST be registered before the routes to handle file data
+app.register(multipart, {
+  limits: {
+    fileSize: 50 * 1024 * 1024, // Set limit to 50MB for digital products/videos
+  },
 });
-app.register(authRoutes, { prefix: "/api/auth" })
+// Register Routes
+app.register(authRoutes, { prefix: "/api/v1/auth" });
+app.register(productRoutes, { prefix: "/api/v1/products" });
+app.register(uploadRoutes, { prefix: "/api/v1/upload" });
+
 const start = async () => {
   try {
-    // 1. Connect to PostgreSQL first (Fail fast if DB is down)
+    // 1. Check Database
     await testDbConnection();
 
-    // 2. Start Fastify on Port 4000
+    // 2. Start Server
     const PORT = Number(process.env.PORT) || 4000;
-
     await app.listen({ port: PORT, host: '0.0.0.0' });
 
-    // Using app.log is more "Professional" than console.log in Fastify
-    app.log.info(`Server live at http://localhost:${PORT}`);
+    app.log.info(` Backend Server running on http://localhost:${PORT}`);
   } catch (err) {
     app.log.error(err);
     process.exit(1);

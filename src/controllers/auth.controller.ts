@@ -16,7 +16,7 @@ export const registerUserHandler = async (req: FastifyRequest, reply: FastifyRep
     });
   } catch (error: any) {
     if (error instanceof ZodError) {
-      return reply.code(400).send({ success: false, errors: error.issues });
+      return reply.code(400).send({ success: false, message: "Validation error", errors: error.issues });
     }
     return reply.code(400).send({ success: false, message: error.message });
   }

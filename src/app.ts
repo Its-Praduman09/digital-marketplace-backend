@@ -3,6 +3,7 @@ import 'dotenv/config';
 import Fastify from 'fastify';
 import { testDbConnection } from './config/db.js';
 import { authRoutes } from './routes/auth.routes.js';
+import { orderRoutes } from './routes/order.route.js';
 import { productRoutes } from './routes/product.routes.js';
 import { uploadRoutes } from './routes/upload.routes.js';
 
@@ -25,6 +26,8 @@ app.register(multipart, {
 app.register(authRoutes, { prefix: "/api/v1/auth" });
 app.register(productRoutes, { prefix: "/api/v1/products" });
 app.register(uploadRoutes, { prefix: "/api/v1/upload" });
+// Registering the order routes
+app.register(orderRoutes, { prefix: "/api/v1/orders" });
 
 const start = async () => {
   try {
